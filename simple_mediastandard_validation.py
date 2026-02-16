@@ -49,8 +49,9 @@ def main(argv):
     """
     json="medienstandard_v3_regex.json"
     verbose = False
+    failOnly = False
     try:
-        opts, args = getopt.getopt(argv, "hj:v", ["help","json=", "verbose"])
+        opts, args = getopt.getopt(argv, "fhj:v", ["fail-only", "help","json=", "verbose"])
     except getopt.GetoptError:
         usage()
         return 2
@@ -58,6 +59,8 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             return 0
+        elif opt in ('-f', '--fail-only'):
+            failOnly = True 
         elif opt in ('-v', '--verbose'):
             verbose = True 
         elif opt in ('-j', '--json'):
@@ -81,12 +84,29 @@ def main(argv):
                 print(f'{filename}\t[FAIL]')
         else:
             filename = file_path.absolute() if file_path.exists() else file_path.name
-            if verbose:
-                print(f'Informationen zu {filename}: ')
-                checker.check_content(result)
-            else:
-                print(f'{filename}\t[OK]')
+            try: 
+                information = checker.get_content(result)
+                if not failOnly:
+                    if verbose:
+                        print(f'Informationen zu {filename}: ')
+                        print_information(information)
+                    else:
+                        print(f'{filename}\t[OK]')
+            except Exception as e:
+                if verbose:
+                    print(f'{filename}\t[FAIL]: {e}')
+                else:
+                    print(f'{filename}\t[FAIL]')
     return 0 
+
+def print_information(information: dict):
+    """Display the information
+    """
+    for key in information.keys():
+        print(f'\t{information[key]["label"]}:\t{information[key]["text"]}')
+        if 'contents' in information[key].keys():
+            for content in information[key]['contents']:
+                print(f'\t{content["label"]}:\t{content["text"]}')
 
 def get_filenames(paths: List[PosixPath]) -> List[PosixPath]:
     """Get a list of filenames from input arguments

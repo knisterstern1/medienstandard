@@ -42,6 +42,7 @@ def main(argv):
     mediastandard_validation.py [OPTIONS] file1 file2 ... | directory
 
         OPTIONS:
+        -f|--fail-only  show only fails
         -h|--help       show help
         -j|--json=file  json file
         -v|--verbose    print infomation about json
@@ -50,8 +51,9 @@ def main(argv):
     """
     json="medienstandard_v3_regex.json"
     verbose = False
+    failOnly = False
     try:
-        opts, args = getopt.getopt(argv, "hj:v", ["help","json=", "verbose"])
+        opts, args = getopt.getopt(argv, "fhj:v", ["fail-only", "help","json=", "verbose"])
     except getopt.GetoptError:
         usage()
         return 2
@@ -59,19 +61,21 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             return 0
+        elif opt in ('-f', '--fail-only'):
+            failOnly = True 
         elif opt in ('-v', '--verbose'):
             verbose = True 
         elif opt in ('-j', '--json'):
             json = arg
     checker = MediaStandard()
-    checker.load(json, verbose)
+    color_dict = { "default": Fore.LIGHTBLUE_EX, "comment": Fore.LIGHTWHITE_EX, "fail": Fore.RED,  "reset": Style.RESET_ALL}
+    checker.load(json, verbose, color_dict)
     filenames = get_filenames([ Path(arg) for arg in args ])
     
     print(Fore.MAGENTA + f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.' + Style.RESET_ALL)
     if len(filenames) < 1:
         print('Nothing to do ...')
         usage()
-    color_dict = { "fail": Fore.RED, "default": Fore.LIGHTBLUE_EX, "reset": Style.RESET_ALL  }
     for file_path in filenames: 
         result = checker.check_filename(file_path)
         if not result.check_passed:
@@ -83,18 +87,28 @@ def main(argv):
         else:
             filename = Fore.LIGHTBLUE_EX + file_path.absolute() + Style.RESET_ALL if file_path.exists() else Fore.LIGHTBLUE_EX + file_path.name + Style.RESET_ALL
             try: 
-                information = checker.check_content(result, verbose)
-                if verbose:
-                    print(f'Informationen zu {filename}: ')
-                    print(information)
-                else:
-                    print(f'{filename}\t[OK]')
+                information = checker.get_content(result)
+                if not failOnly:
+                    if verbose:
+                        print(f'Informationen zu {filename}: ')
+                        print_information(information)
+                    else:
+                        print(f'{filename}\t[OK]')
             except Exception as e:
                 if verbose:
                     print(f'{filename}\t[' + Fore.RED + 'FAIL' + Style.RESET_ALL + f']: {e}')
                 else:
                     print(f'{filename}\t[' + Fore.RED + 'FAIL' + Style.RESET_ALL + f']')
     return 0 
+
+def print_information(information: dict):
+    """Display the information
+    """
+    for key in information.keys():
+        print(f'\t{information[key]["label"]}:\t' + Fore.LIGHTBLUE_EX + f'{information[key]["text"]}' + Style.RESET_ALL)
+        if 'contents' in information[key].keys():
+            for content in information[key]['contents']:
+                print(f'\t{content["label"]}:\t'  + Fore.LIGHTBLUE_EX + f'{content["text"]}' + Style.RESET_ALL)
 
 def get_filenames(paths: List[PosixPath]) -> List[PosixPath]:
     """Get a list of filenames from input arguments

@@ -5,15 +5,21 @@ import sys
 
 # my module
 from mediastandard import MediaStandard
+from mediastandard_validation import print_information
 
 
 class TestMediastandard(unittest.TestCase):
     def setUp(self):
         self.checker = MediaStandard()
-        self.checker.load('medienstandard_v3_regex.json', False, Fore.MAGENTA)
+        self.checker.load('medienstandard_v3_regex.json', False)
 
     def testLoad(self):
         self.assertEqual(self.checker.version, '3.0.1')
+
+    def test_get_content(self):
+        result = self.checker.check_filename(Path('kw1a_v007004_2022-05-20_museumsnacht-2022_s-031.jpg'))
+        information = self.checker.get_content(result)
+        print_information(information)
 
     def test_check_filename(self):
         result = self.checker.check_filename(Path('pd31_v007004_2022-05-20_museumsnacht-2022_s-031.jpg'))

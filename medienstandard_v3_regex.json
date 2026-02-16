@@ -172,8 +172,28 @@
      "r31": "Korrespondenz",
          "r23": "Technischer Befund",
      "o2b": "Archivmaster Bild"
-       }
+       },
+       "w": {
+	"1": "Gesamtansicht",
+	"2": "Detailansicht (Ausschnitt)",
+	"3": "Teilansicht mehrteiliges Werk (Fragment)",
+	"4": "Zum Werk gehörende Objekte (kein Werk abgebildet)",
+	"a": "Auflicht (VIS)",
+	"s": "Streiflicht (VIS)",
+	"d": "Durchlicht (VIS)",
+	"u": "UV (Ultraviolettstrahlung)",
+	"i": "IRR (Infrarotstrahlung)",
+	"r": "XR (Röntgenstrahlung)",
+	"m": "Mikroskop",
+	"p": "Polynomial texture mapping (RTI)",
+	"x": "weitere Bildgebende Verfahren"
+	},
+	"mappingCategoryLabel":{
+	"w": "Aufnahmemethode",
+	"o": "Medium des Originalwerks"
+	}
   },
+  
   "vocabulary":{
     "owner":"Eigentümer",
     "areaCategory":"Bereich und Kategorie",

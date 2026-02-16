@@ -50,24 +50,41 @@ class MediaStandard:
             result = Result(True, '',m.groupdict())
         return result
 
-    def check_content(self, result: Result, verbose=False) ->str: 
-        """Verbose: expand information contained in filename
+    def get_content(self, result: Result) ->dict:
+        """Return a dict with all the information.
         """
-        informationArray = []
+        information = {}
         for key in result.groups.keys():
             if key in self.content.keys():
                 label = self.vocabulary[key] if key in self.vocabulary.keys() else key
+                combinedCategory = None
                 if not result.groups[key] in self.content[key].keys():
-                    raise Exception(f'{result.groups[key]} not in "{label}"')
-                if verbose:
-                    informationArray.append(f'\t{label}: {self.content[key][result.groups[key]]}')
-        return ('\n').join(informationArray)
+                    if result.groups[key][0] in self.content.keys() and result.groups[key][1] in self.content[result.groups[key][0]].keys() and result.groups[key][2] in self.content[result.groups[key][0]].keys():
+                        combinedCategory = { "key": result.groups[key][0], "parent": key }
+                    else:
+                        raise Exception(f'{result.groups[key]} not in "{label}"')
+                if key == 'areaCategory' and result.groups[key][0] in self.content['area'].keys():
+                    information['area'] = { "label": "Bereich", "text": self.content["area"][result.groups[key][0]] } 
+                    if combinedCategory is not None:
+                        combinedCategory['parent'] = 'area'
+                    label = 'Kategorie'
+                if combinedCategory is not None:
+                    contents = []
+                    labels = [ label, self.content['mappingCategoryLabel'][combinedCategory['key']] ] 
+                    for index in [ 1, 2]:
+                        contents.append({ "label": labels[index-1], "text": self.content[combinedCategory['key']][result.groups[key][index]]})
+                    information[combinedCategory['parent']]['contents'] = contents 
+                else:
+                    information[key] = { "label": label, "text": self.content[key][result.groups[key]] }
+        return information
 
 
-    def load(self, json_file, verbose=False, colorkey=''):
+    def load(self, json_file, verbose=False, color_dict=None):
         """Load a specific standard
         """
-        style_reset = '\x1b[0m' if colorkey != '' else ''
+        style_reset = '' if color_dict is None or 'reset' not in color_dict.keys() else color_dict['reset']
+        if color_dict is None:
+            color_dict = { "default":"", "comment": "" }
         with open(json_file, encoding='utf-8') as json_ref:
             data = json.load(json_ref)
             self.version = data['info']['version']
@@ -77,8 +94,8 @@ class MediaStandard:
             self.vocabulary = data['vocabulary']
             for rule in data['rules']:
                 self.rules.append(Rule(rule))
-        print(colorkey + f"Medienstandard Version {self.version}, {self.year} geladen ..." + style_reset)
+        print(color_dict['default'] + f"Medienstandard Version {self.version}, {self.year} geladen ..." + style_reset)
         if verbose:
-            print(colorkey + data['comment'] + style_reset)
+            print(color_dict['comment'] + data['comment'] + style_reset)
 
 
