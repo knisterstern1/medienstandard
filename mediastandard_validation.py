@@ -82,11 +82,18 @@ def main(argv):
                 print(f'{filename}\t[' + Fore.RED + 'FAIL' + Style.RESET_ALL + f']')
         else:
             filename = Fore.LIGHTBLUE_EX + file_path.absolute() + Style.RESET_ALL if file_path.exists() else Fore.LIGHTBLUE_EX + file_path.name + Style.RESET_ALL
-            if verbose:
-                print(f'Informationen zu {filename}: ')
-                checker.check_content(result)
-            else:
-                print(f'{filename}\t[OK]')
+            try: 
+                information = checker.check_content(result, verbose)
+                if verbose:
+                    print(f'Informationen zu {filename}: ')
+                    print(information)
+                else:
+                    print(f'{filename}\t[OK]')
+            except Exception as e:
+                if verbose:
+                    print(f'{filename}\t[' + Fore.RED + 'FAIL' + Style.RESET_ALL + f']: {e}')
+                else:
+                    print(f'{filename}\t[' + Fore.RED + 'FAIL' + Style.RESET_ALL + f']')
     return 0 
 
 def get_filenames(paths: List[PosixPath]) -> List[PosixPath]:

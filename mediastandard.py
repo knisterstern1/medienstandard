@@ -20,7 +20,7 @@ import os
 from pathlib import Path, PosixPath
 import re
 import sys
-import urllib
+from urllib import parse
 from typing import List
 
 # my modules
@@ -50,25 +50,29 @@ class MediaStandard:
             result = Result(True, '',m.groupdict())
         return result
 
-    def check_content(self, result: Result) ->Result: 
-        """Check if filename conforms to rules
+    def check_content(self, result: Result, verbose=False) ->str: 
+        """Verbose: expand information contained in filename
         """
+        informationArray = []
         for key in result.groups.keys():
             if key in self.content.keys():
                 label = self.vocabulary[key] if key in self.vocabulary.keys() else key
-                print(f'{label}: {self.content[key][result.groups[key]]}')
-        return result
+                if not result.groups[key] in self.content[key].keys():
+                    raise Exception(f'{result.groups[key]} not in "{label}"')
+                if verbose:
+                    informationArray.append(f'\t{label}: {self.content[key][result.groups[key]]}')
+        return ('\n').join(informationArray)
 
 
     def load(self, json_file, verbose=False, colorkey=''):
         """Load a specific standard
         """
         style_reset = '\x1b[0m' if colorkey != '' else ''
-        with open(json_file) as json_ref:
+        with open(json_file, encoding='utf-8') as json_ref:
             data = json.load(json_ref)
             self.version = data['info']['version']
             self.year = data['info']['year']
-            self.pattern = re.compile(urllib.parse.unquote(data['pattern']))
+            self.pattern = re.compile(parse.unquote(data['pattern']))
             self.content = data['content']
             self.vocabulary = data['vocabulary']
             for rule in data['rules']:
