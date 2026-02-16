@@ -15,7 +15,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/> 1}}}
-from colorama import Fore, Style
 import os
 from pathlib import Path, PosixPath
 import re
@@ -41,16 +40,16 @@ class Result:
             self.error_msg = self.error_msg + ": " + message
 
 
-    def getFilenameInfo(self, file_path: PosixPath, color='') ->str:
+    def getFilenameInfo(self, file_path: PosixPath, color_dict: dict) ->str:
         """Get graphical information about filename
         """
         if file_path.exists():
             if not self.check_passed and self.groups:
-                return color + f'{file_path.parent.absolute()}{os.sep}{self.groups["before"]}' + Fore.RED + f'{self.groups["error"]}' + Style.RESET_ALL + color + f'{self.groups["after"]}' + Style.RESET_ALL
+                return color_dict['default'] + f'{file_path.parent.absolute()}{os.sep}{self.groups["before"]}' + color_dict['fail'] + f'{self.groups["error"]}' + color_dict['reset'] + color_dict['default'] + f'{self.groups["after"]}' + color_dict['reset']
             return file_path.absolute()
         else:
             if not self.check_passed and self.groups:
-                return color + f'{self.groups["before"]}' + Fore.RED + f'{self.groups["error"]}' + Style.RESET_ALL + color + f'{self.groups["after"]}' + Style.RESET_ALL
+                return color_dict['default'] + f'{self.groups["before"]}' + color_dict['fail'] + f'{self.groups["error"]}' + color_dict['reset'] + color_dict['default'] + f'{self.groups["after"]}' + color_dict['reset']
             return file_path.name
 
 

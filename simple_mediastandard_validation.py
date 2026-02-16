@@ -16,7 +16,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/> 1}}}
-from colorama import Fore, Style
 import getopt
 import json
 import os
@@ -67,21 +66,21 @@ def main(argv):
     checker.load(json, verbose)
     filenames = get_filenames([ Path(arg) for arg in args ])
     
-    print(Fore.MAGENTA + f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.' + Style.RESET_ALL)
+    print(f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.')
     if len(filenames) < 1:
         print('Nothing to do ...')
         usage()
-    color_dict = { "fail": Fore.RED, "default": Fore.LIGHTBLUE_EX, "reset": Style.RESET_ALL  }
+    color_dict = { "fail": '', "default": '', "reset": ''  }
     for file_path in filenames: 
         result = checker.check_filename(file_path)
         if not result.check_passed:
             filename = result.getFilenameInfo(file_path, color_dict)
             if verbose:
-                print(f'{filename}\t[' + Fore.RED + 'FAIL' + Style.RESET_ALL + f']: {result.error_msg}')
+                print(f'{filename}\t[FAIL]: {result.error_msg}')
             else:
-                print(f'{filename}\t[' + Fore.RED + 'FAIL' + Style.RESET_ALL + f']')
+                print(f'{filename}\t[FAIL]')
         else:
-            filename = Fore.LIGHTBLUE_EX + file_path.absolute() + Style.RESET_ALL if file_path.exists() else Fore.LIGHTBLUE_EX + file_path.name + Style.RESET_ALL
+            filename = file_path.absolute() if file_path.exists() else file_path.name
             if verbose:
                 print(f'Informationen zu {filename}: ')
                 checker.check_content(result)
