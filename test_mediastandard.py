@@ -11,7 +11,7 @@ from mediastandard_validation import print_information
 class TestMediastandard(unittest.TestCase):
     def setUp(self):
         self.checker = MediaStandard()
-        self.checker.load('medienstandard_v3_regex.json', False)
+        self.checker.load('medienstandard_v3_regex.json')
 
     def testLoad(self):
         self.assertEqual(self.checker.version, '3.0.1')
@@ -19,7 +19,17 @@ class TestMediastandard(unittest.TestCase):
     def test_get_content(self):
         result = self.checker.check_filename(Path('kw1a_v007004_2022-05-20_museumsnacht-2022_s-031.jpg'))
         information = self.checker.get_content(result)
-        print_information(information)
+        self.assertEqual(information['ids']['contents'][0]['text'], '7004')
+        result = self.checker.check_filename(Path('kw1a_0007004_2022-05-20_museumsnacht-2022_s-031.jpg'))
+        information = self.checker.get_content(result)
+        self.assertEqual(information['ids']['contents'][0]['text'], '7004')
+        result = self.checker.check_filename(Path('kw1a_x007004_2022-05-20_museumsnacht-2022_s-031.jpg'))
+        with self.assertRaises(Exception):
+            self.checker.get_content(result)
+
+    def test_parse_title(self):
+        information = self.checker.parse_title('_asdf-asdf', 'test')
+        self.assertEqual(information['text'], 'Asdf Asdf')
 
     def test_check_filename(self):
         result = self.checker.check_filename(Path('pd31_v007004_2022-05-20_museumsnacht-2022_s-031.jpg'))

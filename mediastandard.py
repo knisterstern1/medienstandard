@@ -36,6 +36,8 @@ class MediaStandard:
     def __init__(self): 
         self.version = "3.0"
         self.rules = []
+        self.comments = []
+        self.mapping = { 'text': self.parse_title, 'ids': self.parse_ids }
 
     def check_filename(self, path: PosixPath) ->Result: 
         """Check if filename conforms to rules
@@ -48,15 +50,19 @@ class MediaStandard:
         m = self.pattern.match(path.name)
         if m is not None:
             result = Result(True, '',m.groupdict())
+        else:
+            result = Result(False, 'Pattern does not match')
         return result
 
     def get_content(self, result: Result) ->dict:
         """Return a dict with all the information.
         """
         information = {}
+        if result is None or result.groups is None:
+            raise Exception(f'Pattern does not match!')
         for key in result.groups.keys():
+            label = self.vocabulary[key] if key in self.vocabulary.keys() else key
             if key in self.content.keys():
-                label = self.vocabulary[key] if key in self.vocabulary.keys() else key
                 combinedCategory = None
                 if not result.groups[key] in self.content[key].keys():
                     if result.groups[key][0] in self.content.keys() and result.groups[key][1] in self.content[result.groups[key][0]].keys() and result.groups[key][2] in self.content[result.groups[key][0]].keys():
@@ -76,26 +82,45 @@ class MediaStandard:
                     information[combinedCategory['parent']]['contents'] = contents 
                 else:
                     information[key] = { "label": label, "text": self.content[key][result.groups[key]] }
+            elif key in self.vocabulary.keys():
+                if key in self.mapping.keys():
+                    information[key] = self.mapping[key](result.groups[key], label)
+                else:
+                    information[key] = { "label": self.vocabulary[key], "text": result.groups[key] }
         return information
 
-
-    def load(self, json_file, verbose=False, color_dict=None):
+    def load(self, json_file) ->int:
         """Load a specific standard
         """
-        style_reset = '' if color_dict is None or 'reset' not in color_dict.keys() else color_dict['reset']
-        if color_dict is None:
-            color_dict = { "default":"", "comment": "" }
         with open(json_file, encoding='utf-8') as json_ref:
             data = json.load(json_ref)
             self.version = data['info']['version']
             self.year = data['info']['year']
+            self.comments = data['info']['comments']
             self.pattern = re.compile(parse.unquote(data['pattern']))
             self.content = data['content']
             self.vocabulary = data['vocabulary']
             for rule in data['rules']:
                 self.rules.append(Rule(rule))
-        print(color_dict['default'] + f"Medienstandard Version {self.version}, {self.year} geladen ..." + style_reset)
-        if verbose:
-            print(color_dict['comment'] + data['comment'] + style_reset)
+        return 0
 
+    def parse_title(self, title: str, label: str) ->dict:
+        """Parses a title and returns an information dict.
+        """
+        texts = [ text.replace('_','').capitalize() for text in title.split('-') ]
+        return { "label": label, "text": ' '.join(texts) }
 
+    def parse_ids(self, ids: str, label: str) ->dict:
+        """Parses a title and returns an information dict.
+        """
+        contents = []
+        for id in [ id.replace('_','') for id in ids.split('-') ]:
+            prefix = id[0]            
+            suffix = id if not re.match('(^[0arlpsvz]+)*([1-9]+)', id) else re.split('^[0arlpsvz]+', id)[1]
+            if prefix in self.vocabulary.keys():
+                contents.append({"label": self.vocabulary[prefix], "text": suffix })
+            elif re.match('[0-9]', prefix):
+                contents.append({"label": "Objekt", "text": suffix })
+            else:
+                raise Exception(f'{prefix} is not a valid prefix for ID reference')
+        return { "label": label, "text": f'{list(dict.fromkeys([ content["label"] for content in contents ]))}', "contents": contents }

@@ -66,7 +66,12 @@ def main(argv):
         elif opt in ('-j', '--json'):
             json = arg
     checker = MediaStandard()
-    checker.load(json, verbose)
+    if checker.load(json) == 0:
+        print(f"Medienstandard Version {checker.version}, {checker.year} geladen ...")
+        if verbose:
+            for comment in checker.comments:
+                print(f'\n{comment}')
+
     filenames = get_filenames([ Path(arg) for arg in args ])
     
     print(f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.')

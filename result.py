@@ -46,10 +46,10 @@ class Result:
         if file_path.exists():
             if not self.check_passed and self.groups:
                 return color_dict['default'] + f'{file_path.parent.absolute()}{os.sep}{self.groups["before"]}' + color_dict['fail'] + f'{self.groups["error"]}' + color_dict['reset'] + color_dict['default'] + f'{self.groups["after"]}' + color_dict['reset']
-            return file_path.absolute()
+            return color_dict['default'] + f'{file_path.absolute()}' + color_dict['reset']
         else:
             if not self.check_passed and self.groups:
                 return color_dict['default'] + f'{self.groups["before"]}' + color_dict['fail'] + f'{self.groups["error"]}' + color_dict['reset'] + color_dict['default'] + f'{self.groups["after"]}' + color_dict['reset']
-            return file_path.name
+            return color_dict['default'] + f'{file_path.name}' + color_dict['reset']
 
 

@@ -69,7 +69,11 @@ def main(argv):
             json = arg
     checker = MediaStandard()
     color_dict = { "default": Fore.LIGHTBLUE_EX, "comment": Fore.LIGHTWHITE_EX, "fail": Fore.RED,  "reset": Style.RESET_ALL}
-    checker.load(json, verbose, color_dict)
+    if checker.load(json) == 0:
+        print(color_dict['default'] + f"Medienstandard Version {checker.version}, {checker.year} geladen ..." + Style.RESET_ALL)
+        if verbose:
+            for comment in checker.comments:
+                print(color_dict['comment'] + f'\n{comment}' + Style.RESET_ALL)
     filenames = get_filenames([ Path(arg) for arg in args ])
     
     print(Fore.MAGENTA + f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.' + Style.RESET_ALL)
