@@ -83,10 +83,11 @@ class MediaStandard:
                 else:
                     information[key] = { "label": label, "text": self.content[key][result.groups[key]] }
             elif key in self.vocabulary.keys():
-                if key in self.mapping.keys():
-                    information[key] = self.mapping[key](result.groups[key], label)
-                else:
-                    information[key] = { "label": self.vocabulary[key], "text": result.groups[key] }
+                if result.groups[key] is not None:
+                    if key in self.mapping.keys():
+                        information[key] = self.mapping[key](result.groups[key], label)
+                    else:
+                        information[key] = { "label": self.vocabulary[key], "text": result.groups[key] }
         return information
 
     def load(self, json_file) ->int:

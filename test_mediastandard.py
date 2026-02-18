@@ -26,6 +26,8 @@ class TestMediastandard(unittest.TestCase):
         result = self.checker.check_filename(Path('kw1a_x007004_2022-05-20_museumsnacht-2022_s-031.jpg'))
         with self.assertRaises(Exception):
             self.checker.get_content(result)
+        result = self.checker.check_filename(Path('pd31_2022-05-20_museumsnacht-2022_s-031.mp4'))
+        information = self.checker.get_content(result)
 
     def test_parse_title(self):
         information = self.checker.parse_title('_asdf-asdf', 'test')

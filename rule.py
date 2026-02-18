@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/> 1}}}
 from pathlib import Path, PosixPath
 import re
-import urllib
+from urllib import parse
 
 # my module
 from result import Result
@@ -28,7 +28,7 @@ class Rule:
     """This class represents a rule of the mediastandard
     """
     def __init__(self, rule: dict): 
-        self.pattern = re.compile(urllib.parse.unquote(rule['regex']))
+        self.pattern = re.compile(parse.unquote(rule['regex']))
         self.error = rule['error']
         self.onErrorRules = []
         if 'onError' in rule.keys():

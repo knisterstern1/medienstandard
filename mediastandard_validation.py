@@ -45,6 +45,7 @@ def main(argv):
         -f|--fail-only  show only fails
         -h|--help       show help
         -j|--json=file  json file
+        -p|--pattern    print regex pattern for mediastandard
         -v|--verbose    print infomation about json
     
         :return: exit code (int)
@@ -52,8 +53,9 @@ def main(argv):
     json="medienstandard_v3_regex.json"
     verbose = False
     failOnly = False
+    patternOnly = False
     try:
-        opts, args = getopt.getopt(argv, "fhj:v", ["fail-only", "help","json=", "verbose"])
+        opts, args = getopt.getopt(argv, "fhj:pv", ["fail-only", "help","json=", "pattern", "verbose"])
     except getopt.GetoptError:
         usage()
         return 2
@@ -65,6 +67,8 @@ def main(argv):
             failOnly = True 
         elif opt in ('-v', '--verbose'):
             verbose = True 
+        elif opt in ('-p', '--pattern'):
+            patternOnly = True 
         elif opt in ('-j', '--json'):
             json = arg
     checker = MediaStandard()
@@ -75,7 +79,9 @@ def main(argv):
             for comment in checker.comments:
                 print(color_dict['comment'] + f'\n{comment}' + Style.RESET_ALL)
     filenames = get_filenames([ Path(arg) for arg in args ])
-    
+    if patternOnly:
+        print(checker.pattern.pattern)
+        return 0
     print(Fore.MAGENTA + f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.' + Style.RESET_ALL)
     if len(filenames) < 1:
         print('Nothing to do ...')

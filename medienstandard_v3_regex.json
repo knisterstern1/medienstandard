@@ -16,7 +16,10 @@
         ]},
        {"regex":"%5E%5Ba-tx%5D.%2A%24","error":"Das erste Zeichen (Eigentümer) ist ungültig."},
        {"regex":"%5E.%5Bwrodpabs%5D%5B0-9%5D%5Ba-z0-9%5D.%2A%24","error":"Die Kategorie (2.-4. Zeichen) ist ungültig."},
-       {"regex":"%5E.%7B4%7D_%5Bb-km-oq%5D.%2A","error":"Das Präfix der Objektreferenz ist ungültig."},
+       {"regex":"%5E%28%28%5CS%7B4%7D%29_%28%3FP%3Cids%3E%28%3F%3A%5Barlpsvz%5Cd%5D%3F%28%3F%3A%5Cd%7B6%7D%28%3F%3A-%5Barlpsvz0-9%5D%5Cd%7B6%7D%29%7B0%2C23%7D%3F%29%2B_%3F%29%29%3F%28%3FP%3Cdate%3E%28%5B%5Cdx%5D%7B4%7D%29-%28%5B%5Cdx%5D%7B2%7D%29-%28%5B%5Cdx%5D%7B2%7D%29%29%28.%2A%29%29%24",
+	"error":"Objektreferenz!",
+	"onError": [{"regex":"%28%3FP%3Cbefore%3E%5E.%7B4%7D_%29%28%3FP%3Cerror%3E%5Bb-km-oq%5D%29%28%3FP%3Cafter%3E.%2A%29","error": "Da s Präfix der Objektreferenz ist ungültig."}]
+       },
        {"regex":"%5E.%7B4%7D_.%2A%24","error":"Das 5. Zeichen muss ein Unterstrich sein."},
        {"regex":"%5E%28%3F%3A%5B%5E_%5D%2A_%29%7B2%2C5%7D%5B%5E_%5D%2A%24","error":"Der Dateiname muss 2 bis 5 Unterstriche enthalten."},
        {"regex":"%5E.%2A%5C.%28%5Ba-z0-9%5D%7B2%2C4%7D%29%24","error":"Die Dateiendung muss aus 2-4 Zeichen bestehen."}
