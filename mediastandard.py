@@ -37,7 +37,7 @@ class MediaStandard:
         self.version = "3.0"
         self.rules = []
         self.comments = []
-        self.mapping = { 'text': self.parse_title, 'ids': self.parse_ids }
+        self.mapping = { 'text': self.parse_title, 'ids': self.parse_ids, 'suffix': self.parse_suffix }
 
     def check_filename(self, path: PosixPath) ->Result: 
         """Check if filename conforms to rules
@@ -124,4 +124,15 @@ class MediaStandard:
                 contents.append({"label": "Objekt", "text": suffix })
             else:
                 raise Exception(f'{prefix} is not a valid prefix for ID reference')
+        return { "label": label, "text": f'{list(dict.fromkeys([ content["label"] for content in contents ]))}', "contents": contents }
+
+    def parse_suffix(self, suffix: str, label: str) ->dict:
+        """Parses a suffix and retunrs an information dict.
+        """
+        contents = []
+        for s in [ s for s in suffix.replace('_s-', '').split('-') ]:
+            if s in self.content['suffixType'].keys():
+                contents.append({"label": self.content['suffixType'][s]['label'], "text": self.content['suffixType'][s]['text']})
+            else:
+                raise Exception(f'{s} is not a valid suffix')
         return { "label": label, "text": f'{list(dict.fromkeys([ content["label"] for content in contents ]))}', "contents": contents }
