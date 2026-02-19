@@ -146,6 +146,7 @@
             "s12": "Plakat (werkrepräsentierendes Objekt)",
             "a02": "Protokolle Kunstkommission (B)",
             "d17": "Externe Ausstellung (Leihgaben)",
+	    "d15": "Vor-/Nachbereitung",
             "r21": "Kartierung",
             "a24": "Kasse und Verkauf (N)",
             "o4x": "Sichtungskopie weitere Medien",
@@ -179,6 +180,17 @@
             "r31": "Korrespondenz",
             "r23": "Technischer Befund",
             "o2b": "Archivmaster Bild"
+          },
+	  "o": {
+	   "1": "Ankaufmaster",
+	   "2": "Archivmaster",
+	   "3": "Ausstellungskopie",
+	   "4": "Sichtungskopie (viewing copy)",
+	   "5": "Still/Ausschnitt",
+	   "a": "Audio",
+	   "b": "Bild",
+	   "v": "Video",
+	   "x": "weitere Medien"
           },
           "w": {
             "1": "Gesamtansicht",
