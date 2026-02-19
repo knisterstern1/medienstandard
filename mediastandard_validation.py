@@ -30,7 +30,6 @@ from typing import List
 from mediastandard import MediaStandard
 
 DEBUG = False 
-
 def usage():
     """prints information on how to use the script
     """
@@ -41,7 +40,7 @@ def main(argv):
 
     mediastandard_validation.py [OPTIONS] file1 file2 ... | directory
 
-        OPTIONS:
+    OPTIONS:
         -f|--fail-only  show only fails
         -h|--help       show help
         -j|--json=file  json file
@@ -74,14 +73,15 @@ def main(argv):
     checker = MediaStandard()
     color_dict = { "default": Fore.LIGHTBLUE_EX, "comment": Fore.LIGHTWHITE_EX, "fail": Fore.RED,  "reset": Style.RESET_ALL}
     if checker.load(json) == 0:
-        print(color_dict['default'] + f"Medienstandard Version {checker.version}, {checker.year} geladen ..." + Style.RESET_ALL)
+        print(color_dict['default'] + f"Medienstandard Version {checker.version}, {checker.year} geladen." + Style.RESET_ALL)
         if verbose:
+            print(color_dict['default'] + f"[Quelldatei: {json}]" + Style.RESET_ALL)
             for comment in checker.comments:
                 print(color_dict['comment'] + f'\n{comment}' + Style.RESET_ALL)
-    filenames = get_filenames([ Path(arg) for arg in args ])
     if patternOnly:
         print(checker.pattern.pattern)
         return 0
+    filenames = get_filenames([ Path(arg) for arg in args ])
     print(Fore.MAGENTA + f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.' + Style.RESET_ALL)
     if len(filenames) < 1:
         print('Nothing to do ...')

@@ -30,19 +30,71 @@ from mediastandard import MediaStandard
 
 DEBUG = False 
 
+class Printer:
+    """This class represents a simple output printer.
+    """
+    def print_default(self, output: str):
+        print(output)
+    def print_comment(self, output: str):
+        print(output)
+    def print_comment(self, output: str):
+        print(output)
+    def print_highlight(self, output: str):
+        print(output)
+    def print_fail(self, filename: str, error_msg: str, verbose: bool):
+        if verbose:
+            print(f'{filename}\t[FAIL]:\t{error_msg}')
+        else:
+            print(f'{filename}\t[FAIL]')
+    def print_file_info(self, filename: str, information: dict, verbose: bool):
+        """Display the information
+        """
+        if verbose:
+            print(f'Informationen zu {filename}: ')
+            for key in information.keys():
+                print(f'\t{information[key]["label"]}:\t{information[key]["text"]}')
+                if 'contents' in information[key].keys():
+                    for content in information[key]['contents']:
+                        print(f'\t{content["label"]}:\t{content["text"]}')
+        else:
+            print(f'{filename}\t[OK]')
+
+
+    def get_filename(self, file_path: PosixPath) ->str:
+        return file_path.absolute() if file_path.exists() else file_path.name
+
+
 def usage():
     """prints information on how to use the script
     """
     print(main.__doc__)
 
+def validate(args: List[str], printer: Printer, json: str, verbose: bool, failOnly: bool, patternOnly: bool):
+    """Validate the input.
+    """
+    #TODO: add everything from main
+    checker = MediaStandard()
+    if checker.load(json) == 0:
+        printer.print_default(f"Medienstandard Version {checker.version}, {checker.year} geladen ...")
+        if verbose:
+            printer.print_default(f'"[Quelldatei: {json}]')
+            for comment in checker.comments:
+                print(f'\n{comment}')
+    if patternOnly:
+        print(checker.pattern.pattern)
+        return 0
+
+
 def main(argv):
-    """This program can be used to check whether filenames accord with a media standard.
+    """This program can be used to check whether filenames accord with a media standard. It does not rely on fancy packages.
 
-    mediastandard_validation.py [OPTIONS] file1 file2 ... | directory
+    simple_mediastandard_validation.py [OPTIONS] file1 file2 ... | directory
 
-        OPTIONS:
+    OPTIONS:
+        -f|--fail-only  show only fails
         -h|--help       show help
         -j|--json=file  json file
+        -p|--pattern    print regex pattern for mediastandard
         -v|--verbose    print infomation about json
     
         :return: exit code (int)
@@ -50,8 +102,9 @@ def main(argv):
     json="medienstandard_v3_regex.json"
     verbose = False
     failOnly = False
+    patternOnly = False
     try:
-        opts, args = getopt.getopt(argv, "fhj:v", ["fail-only", "help","json=", "verbose"])
+        opts, args = getopt.getopt(argv, "fhj:pv", ["fail-only", "help","json=", "pattern", "verbose"])
     except getopt.GetoptError:
         usage()
         return 2
@@ -63,14 +116,20 @@ def main(argv):
             failOnly = True 
         elif opt in ('-v', '--verbose'):
             verbose = True 
+        elif opt in ('-p', '--pattern'):
+            patternOnly = True 
         elif opt in ('-j', '--json'):
             json = arg
     checker = MediaStandard()
+    printer = Printer()
     if checker.load(json) == 0:
-        print(f"Medienstandard Version {checker.version}, {checker.year} geladen ...")
+        printer.print_default(f"Medienstandard Version {checker.version}, {checker.year} geladen ...")
         if verbose:
             for comment in checker.comments:
                 print(f'\n{comment}')
+    if patternOnly:
+        print(checker.pattern.pattern)
+        return 0
 
     filenames = get_filenames([ Path(arg) for arg in args ])
     
