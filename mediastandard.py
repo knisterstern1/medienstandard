@@ -130,9 +130,12 @@ class MediaStandard:
         """Parses a suffix and retunrs an information dict.
         """
         contents = []
-        for s in [ s for s in suffix.replace('_s-', '').split('-') ]:
+        for s in [ s for s in suffix.replace('_s-', '').split('-') if not re.match('\d{3}', s) ]:
             if s in self.content['suffixType'].keys():
                 contents.append({"label": self.content['suffixType'][s]['label'], "text": self.content['suffixType'][s]['text']})
             else:
                 raise Exception(f'{s} is not a valid suffix')
+        m = re.match('^(_s-.*)(\d{3})(.*)', suffix)
+        if m:
+            contents.append({"label":"Seriennummer","text": m.groups()[1]})
         return { "label": label, "text": f'{list(dict.fromkeys([ content["label"] for content in contents ]))}', "contents": contents }
