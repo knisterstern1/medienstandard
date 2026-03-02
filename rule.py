@@ -15,8 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/> 1}}}
-from pathlib import Path, PosixPath
 import re
+from pathlib import Path, PosixPath
 from urllib import parse
 
 # my module
@@ -35,14 +35,15 @@ class Rule:
             for errorRule in rule['onError']:
                 self.onErrorRules.append(Rule(errorRule))
 
-    def applies(self, filename: str) ->Result:
+    def applies(self, filename: PosixPath | str) ->Result:
         """Check if rule applies, return Result
         """
-        if self.pattern.match(filename):
-            return Result()
-        errorResult = Result(False, self.error)
+        file_path = filename if type(filename) is PosixPath else Path(filename)
+        if self.pattern.match(file_path.name):
+            return Result(file_path)
+        errorResult = Result(file_path, False, self.error)
         for onErrorRule in self.onErrorRules:
-            m = onErrorRule.findError(filename)
+            m = onErrorRule.findError(file_path.name)
             if m:
                 errorResult.addMessage(onErrorRule.error, m)
         return errorResult

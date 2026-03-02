@@ -28,6 +28,7 @@ class TestMediastandard(unittest.TestCase):
             self.checker.get_content(result)
         result = self.checker.check_filename(Path('pd31_2022-05-20_museumsnacht-2022_s-031.mp4'))
         information = self.checker.get_content(result)
+        print(information)
 
     def test_parse_title(self):
         information = self.checker.parse_title('_asdf-asdf', 'test')

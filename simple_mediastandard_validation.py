@@ -33,9 +33,13 @@ DEBUG = False
 class Printer:
     """This class represents a simple output printer.
     """
+    def get_color_dict(self) ->dict:
+        """Return the color dict
+        """    
+        return  { "fail": '', "default": '', "reset": ''  }
+    def get_filename(self, file_path: PosixPath) ->str:
+        return file_path.absolute() if file_path.exists() else file_path.name
     def print_default(self, output: str):
-        print(output)
-    def print_comment(self, output: str):
         print(output)
     def print_comment(self, output: str):
         print(output)
@@ -58,119 +62,105 @@ class Printer:
                         print(f'\t{content["label"]}:\t{content["text"]}')
         else:
             print(f'{filename}\t[OK]')
-
-
-    def get_filename(self, file_path: PosixPath) ->str:
-        return file_path.absolute() if file_path.exists() else file_path.name
-
-
-def usage():
-    """prints information on how to use the script
-    """
-    print(main.__doc__)
-
-def validate(args: List[str], printer: Printer, json: str, verbose: bool, failOnly: bool, patternOnly: bool):
-    """Validate the input.
-    """
-    #TODO: add everything from main
-    checker = MediaStandard()
-    if checker.load(json) == 0:
-        printer.print_default(f"Medienstandard Version {checker.version}, {checker.year} geladen ...")
+    def print_information(self, filename: str, information: dict, verbose: bool):
+        """Display the information
+        """
         if verbose:
-            printer.print_default(f'"[Quelldatei: {json}]')
-            for comment in checker.comments:
-                print(f'\n{comment}')
-    if patternOnly:
-        print(checker.pattern.pattern)
-        return 0
+            print(f'Informationen zu {filename}: ')
+            for key in [ key for key in information.keys() if key != 'filename']:
+                print(f'\t{information[key]["label"]}:\t{information[key]["text"]}')
+                if 'contents' in information[key].keys():
+                    for content in information[key]['contents']:
+                        print(f'\t{content["label"]}:\t{content["text"]}')
+        else:
+            print(f'{filename}\t[OK]')
 
-
-def main(argv):
-    """This program can be used to check whether filenames accord with a media standard. It does not rely on fancy packages.
-
-    simple_mediastandard_validation.py [OPTIONS] file1 file2 ... | directory
-
+def parse_options(argv: List[str]) ->dict:
+    """
     OPTIONS:
         -f|--fail-only  show only fails
         -h|--help       show help
         -j|--json=file  json file
         -p|--pattern    print regex pattern for mediastandard
         -v|--verbose    print infomation about json
-    
-        :return: exit code (int)
+
     """
-    json="medienstandard_v3_regex.json"
-    verbose = False
-    failOnly = False
-    patternOnly = False
+    options = { 'args': [], 'json': "medienstandard_v3_regex.json", 'verbose': False, 'failOnly': False, 'patternOnly': False, 'showUsage': False, 'message': 0 }
     try:
         opts, args = getopt.getopt(argv, "fhj:pv", ["fail-only", "help","json=", "pattern", "verbose"])
     except getopt.GetoptError:
-        usage()
-        return 2
+        options['showUsage'] = True 
+        options['message'] = 2 
+        return options
     for opt, arg in opts:
         if opt in ('-h', '--help'):
-            usage()
-            return 0
+            options['showUsage'] = True 
+            return options
         elif opt in ('-f', '--fail-only'):
-            failOnly = True 
+            options['failOnly'] = True 
         elif opt in ('-v', '--verbose'):
-            verbose = True 
+            options['verbose'] = True 
         elif opt in ('-p', '--pattern'):
-            patternOnly = True 
+            options['patternOnly'] = True 
         elif opt in ('-j', '--json'):
-            json = arg
+            options['json'] = arg 
+    options['args'] = args
+    return options
+
+def usage():
+    """prints information on how to use the script
+    """
+    extra_doc = "It does not rely on fancy packages." if __name__ == "__main__" else ''
+    print(main.__doc__ + " " + extra_doc)
+    print("\n\t" + sys.argv[0] + " [OPTIONS] file1 file2 ... | directory")
+    print(parse_options.__doc__)
+    print("\t:return: exit code (int)")
+
+def validate(printer: Printer, arg_dict: dict) ->int:
+    """Validate the input.
+    """
+    args = arg_dict['args']
+    json = arg_dict['json']
+    verbose = arg_dict['verbose']
+    patternOnly = arg_dict['patternOnly']
+    failOnly = arg_dict['failOnly']
     checker = MediaStandard()
-    printer = Printer()
     if checker.load(json) == 0:
         printer.print_default(f"Medienstandard Version {checker.version}, {checker.year} geladen ...")
         if verbose:
+            printer.print_default(f'[Quelldatei: {json}]')
             for comment in checker.comments:
                 print(f'\n{comment}')
     if patternOnly:
         print(checker.pattern.pattern)
         return 0
-
     filenames = get_filenames([ Path(arg) for arg in args ])
-    
-    print(f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.')
+    printer.print_highlight(f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.')
     if len(filenames) < 1:
         print('Nothing to do ...')
-        usage()
-    color_dict = { "fail": '', "default": '', "reset": ''  }
+        return usage()
     for file_path in filenames: 
         result = checker.check_filename(file_path)
         if not result.check_passed:
-            filename = result.getFilenameInfo(file_path, color_dict)
-            if verbose:
-                print(f'{filename}\t[FAIL]: {result.error_msg}')
-            else:
-                print(f'{filename}\t[FAIL]')
+            filename = result.getFilenameInfo(printer.get_color_dict())
+            printer.print_fail(filename, result.error_msg, verbose)
         else:
-            filename = file_path.absolute() if file_path.exists() else file_path.name
+            filename = printer.get_filename(file_path) 
             try: 
                 information = checker.get_content(result)
                 if not failOnly:
-                    if verbose:
-                        print(f'Informationen zu {filename}: ')
-                        print_information(information)
-                    else:
-                        print(f'{filename}\t[OK]')
+                    printer.print_information(filename, information, verbose)
             except Exception as e:
-                if verbose:
-                    print(f'{filename}\t[FAIL]: {e}')
-                else:
-                    print(f'{filename}\t[FAIL]')
+                printer.print_fail(filename, e, verbose)
     return 0 
 
-def print_information(information: dict):
-    """Display the information
-    """
-    for key in information.keys():
-        print(f'\t{information[key]["label"]}:\t{information[key]["text"]}')
-        if 'contents' in information[key].keys():
-            for content in information[key]['contents']:
-                print(f'\t{content["label"]}:\t{content["text"]}')
+def main(argv, printer):
+    """This program can be used to check whether filenames accord with a media standard."""
+    arg_dict = parse_options(argv)
+    if arg_dict['showUsage']:
+        usage()
+        return arg_dict['message']
+    return validate(printer, arg_dict) 
 
 def get_filenames(paths: List[PosixPath]) -> List[PosixPath]:
     """Get a list of filenames from input arguments
@@ -185,5 +175,5 @@ def get_filenames(paths: List[PosixPath]) -> List[PosixPath]:
     return filenames
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main(sys.argv[1:], Printer()))
 

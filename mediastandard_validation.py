@@ -28,12 +28,9 @@ from typing import List
 
 # my modules
 from mediastandard import MediaStandard
+from simple_mediastandard_validation import usage
 
 DEBUG = False 
-def usage():
-    """prints information on how to use the script
-    """
-    print(main.__doc__)
 
 def main(argv):
     """This program can be used to check whether filenames accord with a media standard.
@@ -89,7 +86,7 @@ def main(argv):
     for file_path in filenames: 
         result = checker.check_filename(file_path)
         if not result.check_passed:
-            filename = result.getFilenameInfo(file_path, color_dict)
+            filename = result.getFilenameInfo(color_dict)
             if verbose:
                 print(f'{filename}\t[' + Fore.RED + 'FAIL' + Style.RESET_ALL + f']: {result.error_msg}')
             else:

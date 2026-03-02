@@ -24,7 +24,8 @@ DEBUG = False
 class Result:
     """This class represents the result of the Mediastandard check
     """
-    def __init__(self, check_passed=True, error_msg="", groups=None): 
+    def __init__(self, filename: PosixPath, check_passed=True, error_msg="", groups=None): 
+        self.filename = filename
         self.check_passed = check_passed
         self.error_msg = error_msg
         self.groups = groups
@@ -39,17 +40,16 @@ class Result:
         else:
             self.error_msg = self.error_msg + ": " + message
 
-
-    def getFilenameInfo(self, file_path: PosixPath, color_dict: dict) ->str:
+    def getFilenameInfo(self, color_dict: dict) ->str:
         """Get graphical information about filename
         """
-        if file_path.exists():
+        if self.filename.exists():
             if not self.check_passed and self.groups:
-                return color_dict['default'] + f'{file_path.parent.absolute()}{os.sep}{self.groups["before"]}' + color_dict['fail'] + f'{self.groups["error"]}' + color_dict['reset'] + color_dict['default'] + f'{self.groups["after"]}' + color_dict['reset']
-            return color_dict['default'] + f'{file_path.absolute()}' + color_dict['reset']
+                return color_dict['default'] + f'{self.filename.parent.absolute()}{os.sep}{self.groups["before"]}' + color_dict['fail'] + f'{self.groups["error"]}' + color_dict['reset'] + color_dict['default'] + f'{self.groups["after"]}' + color_dict['reset']
+            return color_dict['default'] + f'{self.filename.absolute()}' + color_dict['reset']
         else:
             if not self.check_passed and self.groups:
                 return color_dict['default'] + f'{self.groups["before"]}' + color_dict['fail'] + f'{self.groups["error"]}' + color_dict['reset'] + color_dict['default'] + f'{self.groups["after"]}' + color_dict['reset']
-            return color_dict['default'] + f'{file_path.name}' + color_dict['reset']
+            return color_dict['default'] + f'{self.filename.name}' + color_dict['reset']
 
 

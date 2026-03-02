@@ -44,14 +44,14 @@ class MediaStandard:
         """
         result = None
         for rule in self.rules:
-            result = rule.applies(path.name) 
+            result = rule.applies(path) 
             if not result.check_passed:
                 return result
         m = self.pattern.match(path.name)
         if m is not None:
-            result = Result(True, '',m.groupdict())
+            result = Result(path, True, '',m.groupdict())
         else:
-            result = Result(False, 'Pattern does not match')
+            result = Result(path, False, 'Pattern does not match')
         return result
 
     def get_content(self, result: Result) ->dict:
@@ -60,6 +60,7 @@ class MediaStandard:
         information = {}
         if result is None or result.groups is None:
             raise Exception(f'Pattern does not match!')
+        information['filename'] = result.filename.name
         for key in result.groups.keys():
             label = self.vocabulary[key] if key in self.vocabulary.keys() else key
             if key in self.content.keys():
