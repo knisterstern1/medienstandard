@@ -3,7 +3,7 @@ from pathlib import Path
 
 # my module
 from mediastandard import MediaStandard
-from mediastandard_validation import get_filenames
+from simple_mediastandard_validation import get_filenames
 
 
 class TestMediastandard(unittest.TestCase):

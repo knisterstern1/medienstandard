@@ -33,50 +33,37 @@ DEBUG = False
 class Printer:
     """This class represents a simple output printer.
     """
-    def get_color_dict(self) ->dict:
-        """Return the color dict
-        """    
-        return  { "fail": '', "default": '', "reset": ''  }
+    def __init__(self): 
+        self.color_dict = { "fail": '', "default": '', "reset": '', 'comment':'', 'highlight':''  }
     def get_filename(self, file_path: PosixPath) ->str:
         return file_path.absolute() if file_path.exists() else file_path.name
     def print_default(self, output: str):
-        print(output)
+        print(self.color_dict['default'] + output + self.color_dict['reset'])
     def print_comment(self, output: str):
-        print(output)
+        print(self.color_dict['comment'] + output + self.color_dict['reset'])
     def print_highlight(self, output: str):
-        print(output)
+        print(self.color_dict['highlight'] + output + self.color_dict['reset'])
     def print_fail(self, filename: str, error_msg: str, verbose: bool):
         if verbose:
-            print(f'{filename}\t[FAIL]:\t{error_msg}')
+            print(f'{filename}\t[' + self.color_dict['fail'] + 'FAIL' + self.color_dict['reset'] + f']:\t{error_msg}')
         else:
-            print(f'{filename}\t[FAIL]')
-    def print_file_info(self, filename: str, information: dict, verbose: bool):
-        """Display the information
-        """
-        if verbose:
-            print(f'Informationen zu {filename}: ')
-            for key in information.keys():
-                print(f'\t{information[key]["label"]}:\t{information[key]["text"]}')
-                if 'contents' in information[key].keys():
-                    for content in information[key]['contents']:
-                        print(f'\t{content["label"]}:\t{content["text"]}')
-        else:
-            print(f'{filename}\t[OK]')
+            print(f'{filename}\t[' + self.color_dict['fail'] + 'FAIL' + self.color_dict['reset'] + ']')
     def print_information(self, filename: str, information: dict, verbose: bool):
         """Display the information
         """
         if verbose:
             print(f'Informationen zu {filename}: ')
             for key in [ key for key in information.keys() if key != 'filename']:
-                print(f'\t{information[key]["label"]}:\t{information[key]["text"]}')
+                print(self.color_dict['default'] + f'\t{information[key]["label"]}' + self.color_dict['reset'] + f':\t{information[key]["text"]}')
                 if 'contents' in information[key].keys():
                     for content in information[key]['contents']:
-                        print(f'\t{content["label"]}:\t{content["text"]}')
+                        print(self.color_dict['default'] + f'\t{content["label"]}' + self.color_dict['reset'] + f':\t{content["text"]}')
         else:
             print(f'{filename}\t[OK]')
 
 def parse_options(argv: List[str]) ->dict:
     """
+
     OPTIONS:
         -f|--fail-only  show only fails
         -h|--help       show help
@@ -130,7 +117,7 @@ def validate(printer: Printer, arg_dict: dict) ->int:
         if verbose:
             printer.print_default(f'[Quelldatei: {json}]')
             for comment in checker.comments:
-                print(f'\n{comment}')
+                printer.print_comment(f'\n{comment}')
     if patternOnly:
         print(checker.pattern.pattern)
         return 0
@@ -142,7 +129,7 @@ def validate(printer: Printer, arg_dict: dict) ->int:
     for file_path in filenames: 
         result = checker.check_filename(file_path)
         if not result.check_passed:
-            filename = result.getFilenameInfo(printer.get_color_dict())
+            filename = result.getFilenameInfo(printer.color_dict)
             printer.print_fail(filename, result.error_msg, verbose)
         else:
             filename = printer.get_filename(file_path) 
@@ -154,7 +141,7 @@ def validate(printer: Printer, arg_dict: dict) ->int:
                 printer.print_fail(filename, e, verbose)
     return 0 
 
-def main(argv, printer):
+def main(argv: List[str], printer: Printer):
     """This program can be used to check whether filenames accord with a media standard."""
     arg_dict = parse_options(argv)
     if arg_dict['showUsage']:
