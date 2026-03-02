@@ -54,6 +54,15 @@ class MediaStandard:
             result = Result(path, False, 'Pattern does not match')
         return result
 
+    def display_rules_pattern(self): 
+        """Display all rules and patterns
+        """
+        print(f'General pattern with names for groupdict:\n\n<regex>{self.pattern.pattern}</regex>\n')
+        print(f'Rules ({len(self.rules)}):\n')
+        for index, rule in enumerate(self.rules):
+            print(f'{index+1})\t{rule}')
+        
+
     def get_content(self, result: Result) ->dict:
         """Return a dict with all the information.
         """
@@ -131,12 +140,12 @@ class MediaStandard:
         """Parses a suffix and retunrs an information dict.
         """
         contents = []
-        for s in [ s for s in suffix.replace('_s-', '').split('-') if not re.match('\d{3}', s) ]:
+        for s in [ s for s in suffix.replace('_s-', '').split('-') if not re.match('\\d{3}', s) ]:
             if s in self.content['suffixType'].keys():
                 contents.append({"label": self.content['suffixType'][s]['label'], "text": self.content['suffixType'][s]['text']})
             else:
                 raise Exception(f'{s} is not a valid suffix')
-        m = re.match('^(_s-.*)(\d{3})(.*)', suffix)
+        m = re.match('^(_s-.*)(\\d{3})(.*)', suffix)
         if m:
             contents.append({"label":"Seriennummer","text": m.groups()[1]})
         return { "label": label, "text": f'{list(dict.fromkeys([ content["label"] for content in contents ]))}', "contents": contents }

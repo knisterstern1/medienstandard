@@ -114,13 +114,13 @@ def validate(printer: Printer, arg_dict: dict) ->int:
     checker = MediaStandard()
     if checker.load(json) == 0:
         printer.print_default(f"Medienstandard Version {checker.version}, {checker.year} geladen ...")
-        if verbose:
+        if verbose or patternOnly:
             printer.print_default(f'[Quelldatei: {json}]')
+            if patternOnly:
+                checker.display_rules_pattern()
+                return 0
             for comment in checker.comments:
                 printer.print_comment(f'\n{comment}')
-    if patternOnly:
-        print(checker.pattern.pattern)
-        return 0
     filenames = get_filenames([ Path(arg) for arg in args ])
     printer.print_highlight(f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.')
     if len(filenames) < 1:

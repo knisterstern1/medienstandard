@@ -5,7 +5,6 @@ import sys
 
 # my module
 from mediastandard import MediaStandard
-from mediastandard_validation import print_information
 
 
 class TestMediastandard(unittest.TestCase):

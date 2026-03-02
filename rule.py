@@ -54,3 +54,9 @@ class Rule:
         return self.pattern.match(filename)
 
 
+    def __str__(self):
+        rule =  f'If not <regex>{self.pattern.pattern}</regex> then "{self.error}"'
+        for errorRule in self.onErrorRules:
+            rule = rule + f'\n\t\t if <regex>{errorRule.pattern.pattern}</regex> then "{errorRule.error}"'
+        return rule
+
