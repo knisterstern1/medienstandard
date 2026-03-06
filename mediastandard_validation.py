@@ -31,7 +31,7 @@ class FancyPrinter(Printer):
     def __init__(self):
         self.color_dict = { "default": Fore.LIGHTBLUE_EX, "comment": Fore.LIGHTWHITE_EX, "fail": Fore.RED, "highlight": Fore.MAGENTA, "reset": Style.RESET_ALL}
     def get_filename(self, file_path: PosixPath) ->str:
-        return Fore.LIGHTBLUE_EX + file_path.absolute() + Style.RESET_ALL if file_path.exists() else Fore.LIGHTBLUE_EX + file_path.name + Style.RESET_ALL
+        return Fore.LIGHTBLUE_EX + str(file_path.absolute()) + Style.RESET_ALL if file_path.exists() else Fore.LIGHTBLUE_EX + file_path.name + Style.RESET_ALL
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:], FancyPrinter()))

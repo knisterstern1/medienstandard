@@ -69,7 +69,7 @@ def parse_options(argv: List[str]) ->dict:
         -h|--help       show help
         -j|--json=file  json file
         -p|--pattern    print regex pattern for mediastandard
-        -v|--verbose    print infomation about json
+        -v|--verbose    print fileinfomation
 
     """
     options = { 'args': [], 'json': "medienstandard_v3_regex.json", 'verbose': False, 'failOnly': False, 'patternOnly': False, 'showUsage': False, 'message': 0 }
@@ -121,7 +121,8 @@ def validate(printer: Printer, arg_dict: dict) ->int:
                 return 0
             for comment in checker.comments:
                 printer.print_comment(f'\n{comment}')
-    filenames = get_filenames([ Path(arg) for arg in args ])
+    filenames = []
+    get_filenames(filenames, [ Path(arg) for arg in args ], checker, verbose)
     printer.print_highlight(f'Checking {len(filenames)} filename{"s" if len(filenames) > 1 else ""}.')
     if len(filenames) < 1:
         print('Nothing to do ...')
@@ -149,17 +150,16 @@ def main(argv: List[str], printer: Printer):
         return arg_dict['message']
     return validate(printer, arg_dict) 
 
-def get_filenames(paths: List[PosixPath]) -> List[PosixPath]:
+def get_filenames(filenames: List[PosixPath], paths: List[PosixPath], checker: MediaStandard, verbose: bool) -> List[PosixPath]:
     """Get a list of filenames from input arguments
     """
-    filenames = []
     for file_path in paths:
-        if file_path.is_dir():
-            for filename in get_filenames(list(file_path.glob('*'))):
-                filenames.append(filename)
+        if file_path.is_dir() and not checker.match_dir_name(file_path.name):
+            get_filenames(filenames, list(file_path.glob('*')), checker, verbose)
         else:
             filenames.append(file_path)
-    return filenames
+            if verbose:
+                print(f'{len(filenames)} files added ...', end='\r')
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:], Printer()))

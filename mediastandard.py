@@ -37,7 +37,8 @@ class MediaStandard:
         self.version = "3.0"
         self.rules = []
         self.comments = []
-        self.mapping = { 'text': self.parse_title, 'ids': self.parse_ids, 'suffix': self.parse_suffix }
+        self.mapping = { 'text': self.parse_title, 'ids': self.parse_ids, 'suffix': self.parse_suffix, 'suffixExt': self.parse_suffix }
+        self.include_dirs_pattern = None
 
     def check_filename(self, path: PosixPath) ->Result: 
         """Check if filename conforms to rules
@@ -58,10 +59,10 @@ class MediaStandard:
         """Display all rules and patterns
         """
         print(f'General pattern with names for groupdict:\n\n<regex>{self.pattern.pattern}</regex>\n')
+        print(f'Include directories as pathnames for validation:\n<regex>{self.include_dirs_pattern.pattern}</regex>\n')
         print(f'Rules ({len(self.rules)}):\n')
         for index, rule in enumerate(self.rules):
             print(f'{index+1})\t{rule}')
-        
 
     def get_content(self, result: Result) ->dict:
         """Return a dict with all the information.
@@ -100,6 +101,13 @@ class MediaStandard:
                         information[key] = { "label": self.vocabulary[key], "text": result.groups[key] }
         return information
 
+    def match_dir_name(self, asdf) ->bool:
+        """Check if dir as pathname should be included for validation
+        """
+        if self.include_dirs_pattern is None:
+            return False
+        return self.include_dirs_pattern.match(asdf)
+
     def load(self, json_file) ->int:
         """Load a specific standard
         """
@@ -111,6 +119,8 @@ class MediaStandard:
             self.pattern = re.compile(parse.unquote(data['pattern']))
             self.content = data['content']
             self.vocabulary = data['vocabulary']
+            if 'includeDirs' in data.keys():
+                self.include_dirs_pattern = re.compile(parse.unquote(data['includeDirs']))
             for rule in data['rules']:
                 self.rules.append(Rule(rule))
         return 0

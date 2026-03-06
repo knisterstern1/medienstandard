@@ -1,12 +1,14 @@
 {"info":{
    "version":"3.1", 
    "year":"2026",
-   "comments": [ "Use option -p|--pattern in order to display unquoted pattern and regex of json file."]
+   "comments": [ "Use option -p|--pattern in order to display unquoted pattern and regex of json file."],
+   "changeLog": [ "BagIt file format is valid for TBM."]
    },
-   "pattern":"%5E%28%28%3FP%3Cowner%3E%5CS%7B1%7D%29%28%3FP%3CareaCategory%3E%28%3F%3D%5Bow%5D%29%28%5Bow%5D%5Cd%7B1%7D%5Cw%7B1%7D%29%7C%28%5Cw%7B1%7D%5Cd%7B2%7D%29%29_%28%3FP%3Cids%3E%28%3F%3A%5Barlpsvz%5Cd%5D%3F%28%3F%3A%5Cd%7B6%7D%28%3F%3A-%5Barlpsvz0-9%5D%5Cd%7B6%7D%29%7B0%2C23%7D%3F%29%2B_%3F%29%29%3F%28%3FP%3Cdate%3E%28%5B%5Cdx%5D%7B4%7D%29-%28%5B%5Cdx%5D%7B2%7D%29-%28%5B%5Cdx%5D%7B2%7D%29%29%28%3FP%3Ctext%3E%28%3F%3A%28%3F%21_s-%29_%5Ba-z0-9-%5D%7B1%2C%7D%29%29%3F%28%28%3FP%3CsuffixExt%3E%28%3F%3A_s-%28%5Ba-z0-9%5D%7B1%2C%7D-%29%2A%29%29%28%3FP%3CextSuffix%3Ebag%29%7C%28%3FP%3Csuffix%3E%28%3F%3A_s-%28%3F%21-%29%28%3F%21.%2A--%29%5Ba-z0-9-%5D%7B1%2C%7D%29%29%3F%28%3FP%3Cextension%3E%5C.%5Ba-z0-9%5D%7B2%2C4%7D%29%29%29%24",
+   "includeDirs":"%5E.%2As-%28%5Ba-z0-9%5D%7B1%2C%7D-%29%2Abag%24",
+   "pattern":"%5E%28%28%3FP%3Cowner%3E%5CS%7B1%7D%29%28%3FP%3CareaCategory%3E%28%3F%3D%5Bow%5D%29%28%5Bow%5D%5Cd%7B1%7D%5Cw%7B1%7D%29%7C%28%5Cw%7B1%7D%5Cd%7B2%7D%29%29_%28%3FP%3Cids%3E%28%3F%3A%5Barlpsvz%5Cd%5D%3F%28%3F%3A%5Cd%7B6%7D%28%3F%3A-%5Barlpsvz0-9%5D%5Cd%7B6%7D%29%7B0%2C23%7D%3F%29%2B_%3F%29%29%3F%28%3FP%3Cdate%3E%28%5B%5Cdx%5D%7B4%7D%29-%28%5B%5Cdx%5D%7B2%7D%29-%28%5B%5Cdx%5D%7B2%7D%29%29%28%3FP%3Ctext%3E%28%3F%3A%28%3F%21_s-%29_%5Ba-z0-9-%5D%7B1%2C%7D%29%29%3F%28%28%3FP%3CsuffixExt%3E%28%3F%3A_s-%28%5Ba-z0-9%5D%7B1%2C%7D-%29%2Abag%29%29%7C%28%3FP%3Csuffix%3E%28%3F%3A_s-%28%3F%21-%29%28%3F%21.%2A--%29%5Ba-z0-9-%5D%7B1%2C%7D%29%29%3F%28%3FP%3Cextension%3E%5C.%5Ba-z0-9%5D%7B2%2C4%7D%29%29%29%24",
    "rules":[
        {"regex":"%5E.%7B1%2C80%7D%24","error":"Der Dateiname darf inkl. Dateiendung nicht mehr als 80 Zeichen enthalten."},
-       {"regex":"%5E%5Ba-z0-9_%5C-%5D%2A%5C.%5Ba-z0-9_%5C-%5D%2A%24",
+       {"regex":"%5E%5Ba-z0-9_%5C-%5D%2A%28s-%28%5Ba-z0-9%5D%7B1%2C%7D-%29%2Abag%7C%5C.%5Ba-z0-9_%5C-%5D%2A%24%29",
         "error":"Der Dateiname enthält ungültige Zeichen",
         "onError": [
            {"regex":"%28%3FP%3Cbefore%3E.%2A%29%28%3FP%3Cerror%3E%5BA-Z%5D%2B%29%28%3FP%3Cafter%3E.%2A%29","error":"Grossbuchstaben vorhanden!"},
@@ -22,7 +24,7 @@
        },
        {"regex":"%5E.%7B4%7D_.%2A%24","error":"Das 5. Zeichen muss ein Unterstrich sein."},
        {"regex":"%5E%28%3F%3A%5B%5E_%5D%2A_%29%7B2%2C5%7D%5B%5E_%5D%2A%24","error":"Der Dateiname muss 2 bis 5 Unterstriche enthalten."},
-       {"regex":"%5E.%2A%5C.%28%5Ba-z0-9%5D%7B2%2C4%7D%29%24","error":"Die Dateiendung muss aus 2-4 Zeichen bestehen."}
+       {"regex":"%5E.%2A%28s-%28%5Ba-z0-9%5D%7B1%2C%7D-%29%2Abag%24%7C%5C.%28%5Ba-z0-9%5D%7B2%2C4%7D%29%24%29","error":"Die Dateiendung muss aus 2-4 Zeichen bestehen."}
     ],
     "content":{
          "owner": {
@@ -212,6 +214,10 @@
             "o": "Medium des Originalwerks"
          },
 	 "suffixType": {
+      "bag": {
+        "label": "Dateiendung",
+        "text": "bag"
+    },
     "m8": {
         "label": "Datenträger",
         "text": "Datenträger 8"
