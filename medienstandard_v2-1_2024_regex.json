@@ -6,7 +6,7 @@
             "Use option -p|--pattern in order to display unquoted pattern and regex of json file."
         ]
     },
-    "pattern": "%5E%28%3FP%3Cowner%3E%5CS%29%28%3F%3A%28%3FP%3CareaCategory1%3E%5Bwgk%5D%5Cd%7B2%7D%29_%28%3F%3A%28%3FP%3Cids%3E%5Cd%7B7%7D%29_%29%3F%28%3FP%3Cdate1%3E%5B12x%5D%5B%5Cdx%5D%7B3%7D%5B01x%5D%5B%5Cdx%5D%5B0-3x%5D%5B%5Cdx%5D%29%28%3F%21%5Cd%29%28%3F%3A%28%3FP%3Csuffix1%3E_%5Babcns0%5D%5Cd%7B2%7D%29%3F%28%3FP%3Cextension1%3E%5C.%5Ba-z0-9%5D%7B2%2C4%7D%29%29%7C%28%3FP%3CareaCategory2%3E%5B%5Ewgk%5D%5Cw%7B2%7D%29_%28%3FP%3Cdate2%3E%5B12x%5D%5B%5Cdx%5D%7B3%7D%29_%28%3FP%3Ctext%3E%5Ba-z0-9-%5D%2B%29%28%3F%3A%28%3FP%3Csuffix2%3E_%5Cd%7B2%7D%29%3F%28%3FP%3Cextension2%3E%5C.%5Ba-z0-9%5D%7B2%2C4%7D%29%29%29%24",
+    "pattern": "%5E%28%3FP%3Cowner%3E%5CS%29%28%3FP%3CareaCategory%3E%5Cw%7B3%7D%29_%28%3F%3A%28%3F%3C%3D%28%3F%3Aw%7Cg%7Ck%29%5Cw%7B2%7D_%29%28%3F%3A%28%3FP%3Cids%3E%5Cd%7B7%7D%29_%29%3F%28%3FP%3Cdate1%3E%5B12x%5D%5B%5Cdx%5D%7B3%7D%5B01x%5D%5B%5Cdx%5D%5B0-3x%5D%5B%5Cdx%5D%29%28%3F%21%5Cd%29%28%3FP%3Csuffix1%3E_%5Babcns0%5D%5Cd%7B2%7D%29%3F%7C%28%3F%3C%21%28%3F%3Aw%7Cg%7Ck%29%5Cw%7B2%7D_%29%28%3FP%3Cdate2%3E%5B12x%5D%5B%5Cdx%5D%7B3%7D%29_%28%3FP%3Ctext%3E%5Ba-z0-9-%5D%2B%29%28%3FP%3Csuffix2%3E_%5Cd%7B2%7D%29%3F%29%28%3FP%3Cextension%3E%5C.%5Ba-z0-9%5D%7B2%2C4%7D%29%24",
     "rules": [
         {
             "regex": "%5E.%7B1%2C31%7D%24",
