@@ -37,7 +37,7 @@ class MediaStandard:
         self.version = "3.0"
         self.rules = []
         self.comments = []
-        self.mapping = { 'text': self.parse_title, 'ids': self.parse_ids, 'suffix': self.parse_suffix, 'suffixExt': self.parse_suffix }
+        self.mapping = { 'text': self.parse_title, 'ids': self.parse_ids, 'suffix': self.parse_suffix, 'suffix1': self.parse_v2_suffix, 'suffixExt': self.parse_suffix }
         self.include_dirs_pattern = None
 
     def check_filename(self, path: PosixPath) ->Result: 
@@ -59,7 +59,8 @@ class MediaStandard:
         """Display all rules and patterns
         """
         print(f'General pattern with names for groupdict:\n\n<regex>{self.pattern.pattern}</regex>\n')
-        print(f'Include directories as pathnames for validation:\n<regex>{self.include_dirs_pattern.pattern}</regex>\n')
+        if self.include_dirs_pattern is not None:
+            print(f'Include directories as pathnames for validation:\n<regex>{self.include_dirs_pattern.pattern}</regex>\n')
         print(f'Rules ({len(self.rules)}):\n')
         for index, rule in enumerate(self.rules):
             print(f'{index+1})\t{rule}')
@@ -158,4 +159,20 @@ class MediaStandard:
         m = re.match('^(_s-.*)(\\d{3})(.*)', suffix)
         if m:
             contents.append({"label":"Seriennummer","text": m.groups()[1]})
+        return { "label": label, "text": f'{list(dict.fromkeys([ content["label"] for content in contents ]))}', "contents": contents }
+
+    def parse_v2_suffix(self, rawSuffix: str, label: str) ->dict:
+        """Parses a suffix and retunrs an information dict.
+        """
+        contents = []
+        suffix = rawSuffix.replace('_', '')
+        if re.match('^[^0-9]\d{2}', suffix):
+            s = suffix[0]
+            if s in self.content['suffixType'].keys():
+                contents.append({"label": 'Zusatzangaben zu Qualitätseinschänkungen', "text": self.content['suffixType'][s]})
+                contents.append({"label":"Seriennummer","text": suffix[1:]})
+            else:
+                raise Exception(f'{s} is not a valid suffix')
+        else:
+            contents.append({"label":"Seriennummer","text": suffix})
         return { "label": label, "text": f'{list(dict.fromkeys([ content["label"] for content in contents ]))}', "contents": contents }

@@ -33,6 +33,12 @@ class TestMediastandard(unittest.TestCase):
         information = self.checker.parse_title('_asdf-asdf', 'test')
         self.assertEqual(information['text'], 'Asdf Asdf')
 
+    def test_parse_suffix(self):
+        information = self.checker.parse_suffix('_s-000', 'test')
+        self.assertEqual(information['contents'][0]['text'], '000')
+        information = self.checker.parse_v2_suffix('_000', 'test')
+        self.assertEqual(information['contents'][0]['text'], '000')
+
     def test_check_filename(self):
         result = self.checker.check_filename(Path('pd31_v007004_2022-05-20_museumsnacht-2022_s-031.jpg'))
         self.assertTrue(result.check_passed)
