@@ -15,12 +15,14 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/> 1}}}
+from dataclasses import dataclass
 import os
 from pathlib import Path, PosixPath
 import re
 
 DEBUG = False 
 
+@dataclass
 class Result:
     """This class represents the result of the Mediastandard check
     """

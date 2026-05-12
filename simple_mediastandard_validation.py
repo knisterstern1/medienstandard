@@ -94,7 +94,7 @@ def parse_options(argv: List[str]) ->dict:
     options['args'] = args
     return options
 
-def usage():
+def usage() ->int:
     """prints information on how to use the script
     """
     extra_doc = "It does not rely on fancy packages." if __name__ == "__main__" else ''
@@ -102,6 +102,7 @@ def usage():
     print("\n\t" + sys.argv[0] + " [OPTIONS] file1 file2 ... | directory")
     print(parse_options.__doc__)
     print("\t:return: exit code (int)")
+    return 0
 
 def validate(printer: Printer, arg_dict: dict) ->int:
     """Validate the input.

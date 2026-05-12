@@ -102,12 +102,12 @@ class MediaStandard:
                         information[key] = { "label": self.vocabulary[key], "text": result.groups[key] }
         return information
 
-    def match_dir_name(self, asdf) ->bool:
+    def match_dir_name(self, pathname) ->bool:
         """Check if dir as pathname should be included for validation
         """
         if self.include_dirs_pattern is None:
             return False
-        return self.include_dirs_pattern.match(asdf)
+        return self.include_dirs_pattern.match(pathname)
 
     def load(self, json_file) ->int:
         """Load a specific standard
@@ -148,7 +148,7 @@ class MediaStandard:
         return { "label": label, "text": f'{list(dict.fromkeys([ content["label"] for content in contents ]))}', "contents": contents }
 
     def parse_suffix(self, suffix: str, label: str) ->dict:
-        """Parses a suffix and retunrs an information dict.
+        """Parses a suffix and returns an information dict.
         """
         contents = []
         for s in [ s for s in suffix.replace('_s-', '').split('-') if not re.match('\\d{3}', s) ]:
@@ -156,17 +156,17 @@ class MediaStandard:
                 contents.append({"label": self.content['suffixType'][s]['label'], "text": self.content['suffixType'][s]['text']})
             else:
                 raise Exception(f'{s} is not a valid suffix')
-        m = re.match('^(_s-.*)(\\d{3})(.*)', suffix)
+        m = re.match(r'^(_s-.*)(\d{3})(.*)', suffix)
         if m:
             contents.append({"label":"Seriennummer","text": m.groups()[1]})
         return { "label": label, "text": f'{list(dict.fromkeys([ content["label"] for content in contents ]))}', "contents": contents }
 
     def parse_v2_suffix(self, rawSuffix: str, label: str) ->dict:
-        """Parses a suffix and retunrs an information dict.
+        """Parses a suffix and returns an information dict.
         """
         contents = []
         suffix = rawSuffix.replace('_', '')
-        if re.match('^[^0-9]\d{2}', suffix):
+        if re.match(r'^[^0-9]\d{2}', suffix):
             s = suffix[0]
             if s in self.content['suffixType'].keys():
                 contents.append({"label": 'Zusatzangaben zu Qualitätseinschänkungen', "text": self.content['suffixType'][s]})
