@@ -16,6 +16,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/> 1}}}
+from datetime import datetime
 import getopt
 import csv 
 import os
@@ -24,19 +25,27 @@ import re
 import sys
 from typing import List
 
+EXTENSIONS = ['.mkv','.mov', '.mp4', '.tif', '.jpg']
+
+MD5_PATTERN = re.compile(
+    r"^(?:(?P<prefix>.*?)\s+)?"      # optionaler Präfix-Text + Whitespace
+    r"(?P<hash>[a-fA-F0-9]{32})"     # der MD5-Hash
+    r"(?:\s+(?P<filename>.+))?$",    # optionaler Dateiname nach Whitespace
+    re.MULTILINE
+)
 
 def parse_options(argv: List[str]) ->dict:
     """
 
     OPTIONS:
-        -h|--help                        show help
-        -e|--extensions=ext1+ext2+ext3   file extensions to include
-        -v|--verbose                     print infomation
+        -h|--help              show help
+        -e|--extensions=file   file that contains extensions to include
+        -v|--verbose           print infomation
 
     """
-    options = { 'args': [], 'extensions': ['.mov', '.mp4', '.tif', '.jpg'], 'verbose': False, 'showUsage': False, 'message': 0 }
+    options = { 'args': [], 'verbose': False, 'showUsage': False, 'message': 0 }
     try:
-        opts, args = getopt.getopt(argv, "e:hv", ["extensions=","help","verbose"])
+        opts, args = getopt.getopt(argv, "hv", ["help","verbose"])
     except getopt.GetoptError:
         options['showUsage'] = True 
         options['message'] = 2 
@@ -45,8 +54,6 @@ def parse_options(argv: List[str]) ->dict:
         if opt in ('-h', '--help'):
             options['showUsage'] = True 
             return options
-        elif opt in ('-e', '--extensions'):
-            options['extensions'] = arg.split('+')
         elif opt in ('-v', '--verbose'):
             options['verbose'] = True 
     options['args'] = args
@@ -70,21 +77,79 @@ def main(argv: List[str]):
     verbose = arg_dict['verbose']
     files = []
     bags = []
-    get_files(files, bags, [ Path(arg) for arg in args ], arg_dict, verbose)
-    print(files)
-    print(bags)
+    get_md5_files(files, bags, [ Path(arg) for arg in args ], arg_dict, verbose)
+    stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    if len(files) > 0:
+        write_csv_file(files, stamp, verbose)
+    if len(bags) > 0:
+        write_bag_file(bags, stamp, verbose)
     return 0 
 
-def get_files(files: List[PosixPath], bags: List[PosixPath], paths: List[PosixPath], options: dict, verbose: bool):
+def write_bag_file(bag: List[PosixPath], stamp: str, verbose: bool):
+    """Write list of bag paths 
+    """
+    out = Path(f"{stamp}_bag_paths.txt")
+    out.write_text("\n".join(str(p) for p in bag) + "\n", encoding="utf-8")
+    if verbose:
+        print(f"Geschrieben: {out}")
+
+def write_csv_file(files: List[dict], stamp: str, verbose: bool):
+    """Write md5 information for file to CSV file
+    """
+    out = Path(f"{stamp}_md5-mapping.csv")
+    with out.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=files[0].keys())
+        writer.writeheader()
+        writer.writerows(files)
+    if verbose:
+        print(f"Geschrieben: {out}")
+
+def detect_bom(path) ->str:
+    with path.open("rb") as f:
+        raw = f.read(4)
+    if raw.startswith(b"\xef\xbb\xbf"):
+        return "utf-8-sig"
+    elif raw.startswith(b"\xff\xfe\x00\x00"):
+        return "utf-32-le"
+    elif raw.startswith(b"\x00\x00\xfe\xff"):
+        return "utf-32-be"
+    elif raw.startswith(b"\xff\xfe"):
+        return "utf-16-le"
+    elif raw.startswith(b"\xfe\xff"):
+        return "utf-16-be"
+    return None  # keine BOM gefunden
+
+def find_md5_file(file_path: PosixPath) ->dict:
+    """Try to find the corresponding md5 file for file_path
+    """
+    result = { 'file': file_path, 'md5file': None, 'md5': None, 'error': None }
+    pattern = file_path.stem + "*md5*"
+    result['md5file'] = next(file_path.parent.rglob(pattern), None)
+    if result['md5file'] is not None and result['md5file'].is_file():
+        encoding = detect_bom(result['md5file'])
+        with open(result['md5file'], "r", encoding=encoding) as file:
+            try:
+                first_line = file.readline()
+                if first_line:
+                    m = MD5_PATTERN.match(first_line)
+                    if m and m.groupdict()['hash'] is not None: 
+                        result['md5'] = m.groupdict()['hash']    
+            except Exception as e:
+                print(f'Error reading file {result["md5file"]}: {e}')
+                result['error'] = 'Error reading file'
+    return result
+
+def get_md5_files(files: List[dict], bags: List[PosixPath], paths: List[PosixPath], options: dict, verbose: bool):
     """Get a list of files from input arguments
     """
     for file_path in paths:
         if file_path.is_dir() and not re.match('^.*s-([a-z0-9]{1,}-)*bag$', file_path.name):
-            get_files(files, bags, list(file_path.glob('*')), options, verbose)
+            get_md5_files(files, bags, list(file_path.glob('*')), options, verbose)
         elif re.match('^.*s-([a-z0-9]{1,}-)*bag$', file_path.name):
             bags.append(file_path)
-        elif file_path.suffix in options['extensions']:
-            files.append(file_path)
+        elif file_path.suffix in EXTENSIONS:
+            result = find_md5_file(file_path)
+            files.append(result)
             if verbose:
                 print(f'{len(files)} files added ...', end='\r')
 
