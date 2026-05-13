@@ -39,7 +39,6 @@ def parse_options(argv: List[str]) ->dict:
 
     OPTIONS:
         -h|--help              show help
-        -e|--extensions=file   file that contains extensions to include
         -v|--verbose           print infomation
 
     """
@@ -77,18 +76,21 @@ def main(argv: List[str]):
     verbose = arg_dict['verbose']
     files = []
     bags = []
-    get_md5_files(files, bags, [ Path(arg) for arg in args ], arg_dict, verbose)
+    rest = []
+    get_md5_files(files, bags, rest, [ Path(arg) for arg in args ], arg_dict, verbose)
     stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if len(files) > 0:
         write_csv_file(files, stamp, verbose)
     if len(bags) > 0:
-        write_bag_file(bags, stamp, verbose)
+        write_file_list(bags, 'bag_paths', stamp, verbose)
+    if len(rest) > 0:
+        write_file_list(rest, 'rest_paths', stamp, verbose)
     return 0 
 
-def write_bag_file(bag: List[PosixPath], stamp: str, verbose: bool):
+def write_file_list(bag: List[PosixPath], name: str, stamp: str, verbose: bool):
     """Write list of bag paths 
     """
-    out = Path(f"{stamp}_bag_paths.txt")
+    out = Path(f"{stamp}_{name}.txt")
     out.write_text("\n".join(str(p) for p in bag) + "\n", encoding="utf-8")
     if verbose:
         print(f"Geschrieben: {out}")
@@ -139,12 +141,12 @@ def find_md5_file(file_path: PosixPath) ->dict:
                 result['error'] = 'Error reading file'
     return result
 
-def get_md5_files(files: List[dict], bags: List[PosixPath], paths: List[PosixPath], options: dict, verbose: bool):
+def get_md5_files(files: List[dict], bags: List[PosixPath], rest: List[PosixPath], paths: List[PosixPath], options: dict, verbose: bool):
     """Get a list of files from input arguments
     """
     for file_path in paths:
         if file_path.is_dir() and not re.match('^.*s-([a-z0-9]{1,}-)*bag$', file_path.name):
-            get_md5_files(files, bags, list(file_path.glob('*')), options, verbose)
+            get_md5_files(files, bags, rest, list(file_path.glob('*')), options, verbose)
         elif re.match('^.*s-([a-z0-9]{1,}-)*bag$', file_path.name):
             bags.append(file_path)
         elif file_path.suffix in EXTENSIONS:
@@ -152,6 +154,8 @@ def get_md5_files(files: List[dict], bags: List[PosixPath], paths: List[PosixPat
             files.append(result)
             if verbose:
                 print(f'{len(files)} files added ...', end='\r')
+        elif file_path.suffix not in [ '.md5', '.txt']:
+            rest.append(file_path)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
