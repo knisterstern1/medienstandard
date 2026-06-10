@@ -13,6 +13,23 @@ pip3 install -r requirements.txt
 
 ## Use
 
+Validate filenames from a CSV directory listing (`"Name","FullName","Length"`):
+
+```
+python3 validate_csv.py [OPTIONS] listing.csv
+
+
+OPTIONS:
+
+        -c|--column=name    CSV column containing filenames (default: Name)
+        -f|--fail-only      show only fails
+        -h|--help           show help
+        -j|--json=file      json file
+        -p|--pattern        print regex pattern for mediastandard
+        -v|--verbose        print file information
+
+```
+
 Validate filenames:
 
 ```
