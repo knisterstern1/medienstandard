@@ -45,7 +45,7 @@ MD5_BSD_PATTERN = re.compile(
     re.IGNORECASE
 )
 
-BAG_PATTERN = re.compile(r'^.*s-([a-z0-9]+-)*bag$')
+BAG_PATTERN = re.compile(r'^.*[_-]bag$', re.IGNORECASE)
 
 # Erkennt md5-Dateien anhand ihres Namens
 MD5_FILE_PATTERN = re.compile(r'md5', re.IGNORECASE)
